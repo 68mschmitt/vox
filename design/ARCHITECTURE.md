@@ -83,11 +83,13 @@ persona_forge/
 ├── main.py              # CLI entry point, argument parsing, command dispatch
 ├── config.py            # Constants, thresholds, provider config
 ├── llm/
-│   ├── __init__.py
+│   ├── __init__.py      # Provider factory with auto-detect fallback chain
 │   ├── provider.py      # Abstract LLM interface
 │   ├── anthropic.py     # Anthropic (Claude) provider
+│   ├── bedrock.py       # Amazon Bedrock provider (Converse API, bearer token auth)
+│   ├── ollama.py        # Ollama (local) provider
 │   ├── openai.py        # OpenAI provider
-│   └── ollama.py        # Ollama (local) provider
+│   └── parse.py         # LLM response parsing (JSON extraction, retry logic)
 ├── seed/
 │   ├── __init__.py
 │   ├── interview.py     # Structured interview flow
@@ -125,7 +127,15 @@ class LLMProvider(Protocol):
     def name(self) -> str: ...
 ```
 
-No streaming, no tool use, no complexity. Raw prompt-in, text-out. Provider selection is via CLI flag (`--provider anthropic|openai|ollama`). Default: `anthropic`.
+No streaming, no tool use, no complexity. Raw prompt-in, text-out.
+
+Provider selection uses an auto-detect fallback chain when no explicit provider is specified:
+
+1. **Bedrock** -- if `AWS_BEARER_TOKEN_BEDROCK` is set
+2. **Ollama** -- if a local Ollama instance is reachable at `localhost:11434`
+3. **Anthropic** -- if `ANTHROPIC_API_KEY` is set
+
+An explicit `--provider` flag or `PERSONA_FORGE_PROVIDER` env var bypasses the chain and uses the specified provider directly.
 
 #### `seed/` -- Seed Input Collection
 
@@ -219,6 +229,9 @@ HumanAnswers ──► Evaluator ◄──────── PersonaAnswers
 ## LLM Provider Strategy
 
 - Abstract from day one via the `LLMProvider` protocol
-- Default to Anthropic Claude for calibration (strongest system prompt adherence)
+- Auto-detect fallback chain: Bedrock -> Ollama -> Anthropic (see `llm/__init__.py`)
+- Amazon Bedrock is the preferred cloud provider (Converse API with bearer token auth)
+- Ollama supported for local development with no API key needed
+- Anthropic direct API as final fallback
 - Validate exported personas against target deployment models
 - Provider-specific quirks handled at the export layer, not the calibration layer

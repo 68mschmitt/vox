@@ -27,7 +27,7 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--provider",
-        choices=["anthropic", "openai", "ollama"],
+        choices=["anthropic", "bedrock", "openai", "ollama"],
         default=None,
         help="LLM provider (default: anthropic)",
     )

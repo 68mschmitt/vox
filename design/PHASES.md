@@ -23,16 +23,19 @@ persona_forge/
 ├── main.py              # CLI entry: new, calibrate (1 round), export
 ├── config.py            # Constants only
 ├── llm/
-│   ├── __init__.py
+│   ├── __init__.py      # Provider factory with auto-detect fallback chain
 │   ├── provider.py      # LLMProvider protocol
-│   └── anthropic.py     # Single provider (Claude)
+│   ├── anthropic.py     # Anthropic (Claude) provider
+│   ├── bedrock.py       # Amazon Bedrock provider (Converse API, bearer token)
+│   ├── ollama.py        # Ollama (local) provider
+│   └── parse.py         # JSON extraction from LLM responses, retry wrapper
 ├── seed/
 │   ├── __init__.py
 │   ├── interview.py     # Structured interview (8 questions, hardcoded)
 │   └── generator.py     # generate_persona_from_seed
 ├── calibrate/
 │   ├── __init__.py
-│   ├── loop.py          # Single-round calibration only
+│   ├── loop.py          # Single-round calibration with propose/accept flow
 │   ├── questions.py     # Broad coverage question generation (no adaptive)
 │   └── evaluator.py     # 4-dimension scoring + divergence report
 ├── export/
@@ -54,12 +57,12 @@ persona_forge/
 
 | Component          | POC Scope                                    | Deferred to Later |
 |--------------------|----------------------------------------------|-------------------|
-| LLM Provider       | Anthropic only                               | OpenAI, Ollama    |
+| LLM Provider       | Bedrock, Ollama, Anthropic (auto-detect chain) | OpenAI          |
 | Seed Interview     | 8 hardcoded questions + 2 generated Q&A      | Customizable questions |
 | Persona Schema     | 8 core traits + values + frustrations        | decision_heuristics, tech_preferences, anti_patterns |
 | Calibration        | 1 round, 6 questions, broad coverage only    | Multi-round, adaptive, overhaul |
 | Evaluation         | LLM scoring only (no human quick-rating)     | Human ratings, blind test, consistency check |
-| Mutation           | Display divergence report, manual persona edit | Auto-propose, approve/reject flow |
+| Mutation           | LLM-proposed changes, human accept/reject/edit | Multi-round auto-propose, oscillation detection |
 | Export             | Full format only, print to stdout            | Compact, one-liner, file output, validation |
 | Storage            | Single JSON file, no versioning              | Versions, sessions, tags, golden exemplars |
 | CLI                | `new`, `calibrate`, `export`                 | All other commands |
@@ -70,7 +73,11 @@ persona_forge/
 Day 1-2: Foundation
   ├── config.py (constants)
   ├── llm/provider.py (Protocol definition)
-  ├── llm/anthropic.py (API wrapper)
+  ├── llm/anthropic.py (Anthropic API wrapper)
+  ├── llm/bedrock.py (Amazon Bedrock Converse API, bearer token auth)
+  ├── llm/ollama.py (Ollama local provider)
+  ├── llm/__init__.py (auto-detect fallback: bedrock -> ollama -> anthropic)
+  ├── llm/parse.py (JSON extraction from LLM responses, retry wrapper)
   ├── persona/model.py (Persona dataclass)
   └── persona/store.py (save/load single JSON)
 
@@ -84,7 +91,7 @@ Day 5-6: Calibration Phase
   ├── prompts/templates.py (calibration + evaluation prompts)
   ├── calibrate/questions.py (broad coverage generation)
   ├── calibrate/evaluator.py (4-dimension scoring)
-  ├── calibrate/loop.py (single round orchestration)
+  ├── calibrate/loop.py (single round orchestration + propose/accept flow)
   └── main.py (wire up `calibrate` command)
 
 Day 7: Export Phase
@@ -118,8 +125,6 @@ Run the full flow end-to-end:
 ```
 Changes:
   ├── config.py            # + calibration parameters, thresholds
-  ├── llm/
-  │   └── ollama.py        # + Ollama provider for local dev
   ├── calibrate/
   │   ├── loop.py          # REWRITE: multi-round, convergence, stall detection
   │   ├── questions.py     # + adaptive focus, adversarial questions
@@ -138,7 +143,7 @@ Changes:
 
 | Component          | Alpha Scope                                             | Deferred to MVP |
 |--------------------|---------------------------------------------------------|-----------------|
-| LLM Provider       | + Ollama                                                | OpenAI          |
+| LLM Provider       | (already complete: Bedrock, Ollama, Anthropic)          | OpenAI          |
 | Calibration        | Multi-round (up to 4), adaptive questions, convergence  | Overhaul escape hatch |
 | Evaluation         | + Human quick-ratings, score reconciliation             | Blind test, consistency check |
 | Mutation           | Auto-propose, human approve/reject/modify               | Context-dependent trait splitting |

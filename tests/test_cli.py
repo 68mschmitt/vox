@@ -52,6 +52,12 @@ class TestParser:
         assert args.model == "claude-3-opus"
         assert args.verbose is True
 
+    def test_bedrock_provider_option(self):
+        """Bedrock is a valid provider choice."""
+        parser = _build_parser()
+        args = parser.parse_args(["--provider", "bedrock", "new"])
+        assert args.provider == "bedrock"
+
 
 class TestCmdExport:
     def test_export_nonexistent_persona(self, tmp_path, monkeypatch):

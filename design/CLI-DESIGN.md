@@ -137,7 +137,7 @@ persona-forge calibrate <persona-id> [--rounds MAX] [--provider PROVIDER] [--res
 
 **Flags:**
 - `--rounds N`: Override max rounds (default: 4)
-- `--provider`: LLM provider for this session (default: anthropic)
+- `--provider`: LLM provider for this session (overrides auto-detect)
 - `--resume`: Resume the most recent incomplete session
 
 **Flow:**
@@ -317,19 +317,37 @@ Personas:
 ## Global Options
 
 ```
---provider anthropic|openai|ollama    LLM provider (default: anthropic)
---model MODEL_NAME                    Specific model override
---verbose                             Show LLM prompts and raw responses
---json                                Output in JSON format (for scripting)
+--provider bedrock|anthropic|ollama|openai    LLM provider (overrides auto-detect)
+--model MODEL_NAME                            Specific model override
+--verbose                                     Show LLM prompts and raw responses
+--json                                        Output in JSON format (for scripting)
 ```
+
+When `--provider` is omitted the factory auto-detects in this order:
+1. **bedrock** -- if `AWS_BEARER_TOKEN_BEDROCK` is set
+2. **ollama** -- if a local instance is reachable
+3. **anthropic** -- if `ANTHROPIC_API_KEY` is set
 
 ## Environment Variables
 
 ```bash
-PERSONA_FORGE_PROVIDER=anthropic       # Default LLM provider
-PERSONA_FORGE_MODEL=claude-sonnet-4-20250514     # Default model
-ANTHROPIC_API_KEY=sk-...               # Anthropic API key
-OPENAI_API_KEY=sk-...                  # OpenAI API key
-OLLAMA_HOST=http://localhost:11434     # Ollama endpoint
-PERSONA_FORGE_DIR=~/.persona-forge     # Storage directory (default: ./personas)
+# Provider override (bypasses auto-detect when set)
+PERSONA_FORGE_PROVIDER=bedrock             # Explicit provider choice
+PERSONA_FORGE_MODEL=us.anthropic.claude-sonnet-4-20250514-v1:0  # Model override
+
+# Amazon Bedrock (preferred cloud provider)
+AWS_BEARER_TOKEN_BEDROCK=...               # Bearer token for Bedrock auth
+AWS_BEDROCK_REGION=us-east-1               # AWS region (default: us-east-1)
+
+# Anthropic (direct API)
+ANTHROPIC_API_KEY=sk-...                   # Anthropic API key
+
+# Ollama (local models)
+OLLAMA_HOST=http://localhost:11434         # Ollama endpoint (default)
+
+# OpenAI (future)
+OPENAI_API_KEY=sk-...                      # OpenAI API key
+
+# Storage
+PERSONA_FORGE_DIR=~/.persona-forge         # Storage directory (default: ./personas)
 ```

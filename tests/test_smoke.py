@@ -28,7 +28,7 @@ def test_config_imports():
     assert CONVERGENCE_SCORE == 8.0
     assert MAX_ROUNDS_PER_SESSION == 4
     assert QUESTIONS_PER_ROUND == 6
-    assert DEFAULT_PROVIDER == "anthropic"
+    assert DEFAULT_PROVIDER == ""  # empty = auto-detect fallback chain
     assert len(CORE_TRAITS) == 8
 
 

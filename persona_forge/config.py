@@ -20,7 +20,10 @@ PERSONAS_DIR = Path(os.environ.get("PERSONA_FORGE_DIR", str(DEFAULT_PERSONAS_DIR
 # ---------------------------------------------------------------------------
 # LLM Provider
 # ---------------------------------------------------------------------------
-DEFAULT_PROVIDER = os.environ.get("PERSONA_FORGE_PROVIDER", "anthropic")
+# When PERSONA_FORGE_PROVIDER is set, it acts as an explicit choice (no
+# fallback).  When unset, the factory auto-detects: bedrock -> ollama ->
+# anthropic.  See persona_forge.llm.create_provider().
+DEFAULT_PROVIDER = os.environ.get("PERSONA_FORGE_PROVIDER", "")
 DEFAULT_MODEL = os.environ.get("PERSONA_FORGE_MODEL", "claude-sonnet-4-20250514")
 DEFAULT_TEMPERATURE = 0.7
 
@@ -29,6 +32,12 @@ ANTHROPIC_API_KEY_ENV = "ANTHROPIC_API_KEY"
 OPENAI_API_KEY_ENV = "OPENAI_API_KEY"
 OLLAMA_HOST_ENV = "OLLAMA_HOST"
 OLLAMA_DEFAULT_HOST = "http://localhost:11434"
+
+# Amazon Bedrock
+AWS_BEARER_TOKEN_BEDROCK_ENV = "AWS_BEARER_TOKEN_BEDROCK"
+AWS_BEDROCK_REGION_ENV = "AWS_BEDROCK_REGION"
+BEDROCK_DEFAULT_REGION = "us-east-1"
+BEDROCK_DEFAULT_MODEL = "us.anthropic.claude-sonnet-4-20250514-v1:0"
 
 # ---------------------------------------------------------------------------
 # Scoring Weights (EVALUATION.md)

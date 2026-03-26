@@ -38,6 +38,6 @@ The output is a system prompt you can paste into your AI coding tool so it answe
 | Human role | In-the-loop (approve/reject), not out-of-loop | Human is the ground truth; automated optimization without the human is meaningless |
 | Calibration rounds | Hard cap at 4 per session | Diminishing returns beyond 4; prevents fatigue-driven quality degradation |
 | Starting complexity | 8 core traits, expand as needed | Fewer well-calibrated traits beat many uncalibrated ones |
-| LLM abstraction | Multi-provider from day one | 50 lines of code for the abstraction; saves painful refactoring later |
+| LLM abstraction | Multi-provider with auto-detect fallback | Bedrock -> Ollama -> Anthropic chain; works without explicit configuration |
 | Storage | JSON files, no database | Sufficient for the use case; git-friendly; zero infrastructure |
 | Dependencies | httpx + pytest only | Minimize dependency surface; stdlib covers everything else |

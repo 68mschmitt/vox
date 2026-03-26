@@ -152,7 +152,7 @@ You are {name}, a {role} who values {values[0]} and {values[1]}, communicates in
 
 Different models need different export strategies. The system detects or is told the target model and adjusts accordingly.
 
-### Tier 1: High Capability (Claude 3.5+, GPT-4, Gemini Pro)
+### Tier 1: High Capability (Claude 3.5+ via Bedrock or direct API, GPT-4, Gemini Pro)
 
 - Full export, all traits, all nuance
 - Subtle trait descriptions work ("dry humor with self-deprecating undertones")
@@ -235,14 +235,14 @@ Export saved to: personas/eitan-katz/exports/full.md
 ## Export CLI Commands
 
 ```bash
-# Export current best version, full format
+# Export current best version, full format (uses auto-detected provider)
 persona-forge export eitan-katz
 
 # Export specific version, compact format
 persona-forge export eitan-katz --version 5 --format compact
 
-# Export with validation against target model
-persona-forge export eitan-katz --validate --provider anthropic
+# Export with validation against a specific provider
+persona-forge export eitan-katz --validate --provider bedrock
 
 # Export directly to Claude Code project
 persona-forge export eitan-katz --target claude-code --path ~/projects/myapp
@@ -250,6 +250,6 @@ persona-forge export eitan-katz --target claude-code --path ~/projects/myapp
 # Export all formats at once
 persona-forge export eitan-katz --all-formats
 
-# Cross-model validation
-persona-forge validate eitan-katz --calibration-provider ollama --deployment-provider anthropic
+# Cross-model validation (e.g., calibrate locally, deploy to Bedrock)
+persona-forge validate eitan-katz --calibration-provider ollama --deployment-provider bedrock
 ```
