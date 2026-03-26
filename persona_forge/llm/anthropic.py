@@ -20,6 +20,7 @@ class AnthropicProvider:
     """Anthropic Claude API provider.
 
     Uses the Messages API via httpx. No streaming.
+    Reuses a single httpx client across calls for connection pooling.
     """
 
     API_URL = "https://api.anthropic.com/v1/messages"
@@ -33,6 +34,7 @@ class AnthropicProvider:
                 f"Anthropic API key not found. Set {ANTHROPIC_API_KEY_ENV} "
                 f"environment variable or pass api_key parameter."
             )
+        self._client = httpx.Client(timeout=120.0)
 
     def generate(self, system: str, user: str, temperature: float = 0.7) -> str:
         """Send a prompt to Claude and return the text response."""
@@ -49,9 +51,8 @@ class AnthropicProvider:
             "messages": [{"role": "user", "content": user}],
         }
 
-        with httpx.Client(timeout=120.0) as client:
-            response = client.post(self.API_URL, headers=headers, json=payload)
-            response.raise_for_status()
+        response = self._client.post(self.API_URL, headers=headers, json=payload)
+        response.raise_for_status()
 
         data = response.json()
         # Extract text from the first content block
@@ -60,6 +61,10 @@ class AnthropicProvider:
     @property
     def name(self) -> str:
         return "anthropic"
+
+    def close(self) -> None:
+        """Close the underlying HTTP client."""
+        self._client.close()
 
 
 def create_provider(model: str | None = None) -> AnthropicProvider:

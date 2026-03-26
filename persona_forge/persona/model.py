@@ -267,9 +267,13 @@ def slugify(name: str) -> str:
     return slug.strip("-")
 
 
-def _utc_now() -> str:
+def utc_now() -> str:
     """Return current UTC time as ISO 8601 string."""
     return datetime.now(timezone.utc).isoformat()
+
+
+# Backward compat alias
+_utc_now = utc_now
 
 
 @dataclass
